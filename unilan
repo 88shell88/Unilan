@@ -1,0 +1,14 @@
+#!/bin/bash
+cp Llamada.j Llamada.java
+scriptIn="->"
+while true; do
+	printf "unilan> "
+	read input
+	if [[ $input =~ $scriptIn ]]
+	then
+		java Unilan `echo $input | sed -e 's/[ \t]*//' | sed -e "s/$scriptIn//"`
+	else
+		echo $input > llamar.jpl
+		java Unilan llamar.jpl
+	fi
+done

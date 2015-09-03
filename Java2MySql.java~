@@ -1,0 +1,7 @@
+public class Data{
+	public String[] verbs= {"llamar","mensajear"};
+	public String[] sustantivos = {"Telefono","Wassup"};
+	public String[] Telefono = {"llamar"};
+	public String[] Wassup = {"llamar","mensajear"};
+}
+

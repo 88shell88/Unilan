@@ -1,0 +1,5 @@
+rm Llamada.java
+echo "none" > context
+jflex Unilan.flex
+cup Unilan.cup
+javac *.java

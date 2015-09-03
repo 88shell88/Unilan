@@ -1,0 +1,5 @@
+public class Llamada{
+public Llamada(){
+Wassup cl = new Wassup();
+cl.llamar("[Guiom]");}
+}

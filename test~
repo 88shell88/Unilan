@@ -1,0 +1,6 @@
+(def x =0)
+(x = 1)
+(yo ordenar Wassup llamar lola)
+(yo ordenar Telefono llamar la)
+[1]{x<2}{(yo ordenar Telefono llamar Jorge)}
+[3]{true}{(yo ordenar Telefono llamar Shell)}

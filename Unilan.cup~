@@ -1,0 +1,114 @@
+import java_cup.runtime.*;
+import java.io.*;
+import java.io.File;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.ArrayList;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+import java.lang.StringBuffer;
+
+
+action code 	{:
+			static int i=0,j=0;		
+			Decidir d;
+			LinkedList<Object> list;
+			Llamada l;
+			Process p;
+			StringBuffer condicion= new StringBuffer("");
+				
+		:};
+
+/*terminales*/
+//terminal 			SPRINT;
+terminal			TTRUE,TFALSE,DEF;
+terminal			MAS,MEN,POR,DIV;
+terminal			ASIG,IGUAL,NIGUAL,MAYOR,MENOR,MAYIG,MENIG,AND,OR,NOT;
+terminal			AC,CC,AA,CA;
+terminal			AP,CP,PYC,COMA;
+terminal			TEXTO,COMPROBAR,ORDENAR,REPETIR;//,RETURN;
+terminal Integer		NUM;//,LABEL;
+terminal Simbolo		IDENT,VERB,SUST;
+
+/*no terminales*/
+non terminal			prog, exp, tipo,sent,lista_sent, lista_var,func,llamada_func,lista_func,swhile;
+non terminal			cond;
+
+
+/*precedencias*/
+precedence left			OR;
+precedence left			AND;
+precedence left			AA,CA,AP,CP,AC,CC;
+precedence left			NOT;
+precedence left			IGUAL,NIGUAL,MAYOR,MENOR,MAYIG,MENIG;
+precedence left 		MAS, MEN;
+precedence left			POR,DIV;
+
+
+/*gramatica*/
+/*******************************************************************************************************************/
+prog				::= 	{:d= new Decidir();d.start();:}
+					lista_sent
+					{:
+						d.stop();
+						
+						try{
+							JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+							compiler.run(null,null,null,"Llamada.java");
+							l=new Llamada();
+						}catch(Exception e){
+							e.printStackTrace();
+						}
+					:}
+
+				;
+/*******************************************************************************************************************/
+lista_sent			::=	sent lista_sent
+				|	AP lista_sent CP
+				|	/*epsilon*/
+				;
+/*******************************************************************************************************************/
+lista_var			::=	lista_var IDENT:ident{:list.add(new String(ident.nombre));:}
+				|	lista_var NUM:n{:list.add(new Integer(n));:}
+				|	lista_var TEXTO:t{:list.add(t);:}
+				|	/*epsilon*/
+				;
+/*******************************************************************************************************************/		
+sent 				::=	AP ORDENAR SUST:s1 VERB:s2 {:list=new LinkedList<Object>();:} lista_var CP{:
+						d.simple(s1.nombre, s2.nombre, list);
+					:}
+				|	AP ORDENAR VERB:s2 {:list=new LinkedList<Object>();:} lista_var CP{:
+						String s1="";
+						d.simple(s1, s2.nombre, list);
+					:}
+				|	AA NUM:n CA AC {:condicion= new StringBuffer("");:} cond CC{: d.dWhileCap(condicion.toString(),n); :}AC lista_sent CC {:d.end();:}
+				|	AA NUM:n CA {:d.dFor(n);:}AC lista_sent CC{:d.end();:}
+				|	AP COMPROBAR {:condicion= new StringBuffer("");:}	cond {:d.dWhile(condicion.toString());:} lista_sent CP{:d.end();:}
+				|	AP DEF IDENT:ident ASIG NUM:n {:d.defVar(ident.nombre,n);:}CP
+				|	AP IDENT:ident ASIG NUM:n{:d.asigVar(ident.nombre,n);:}CP
+				;
+/*******************************************************************************************************************/		
+exp				::=	NUM:n1{:condicion.append(" "+n1+" ");:}
+				|	IDENT:s{:condicion.append(" "+s.nombre+" ");:}
+				|	exp MAS{:condicion.append("+");:} exp
+				|	exp MEN{:condicion.append("-");:} exp
+				|	exp POR{:condicion.append("*");:} exp
+				|	exp DIV{:condicion.append("/");:} exp
+				|	MEN{:condicion.append("-");:} exp
+				|	AP{:condicion.append("(");:} exp CP{:condicion.append(")");:}
+				|	/*epsilon*/
+				;
+/*******************************************************************************************************************/	
+cond				::=	exp MAYOR{:condicion.append(">");:} exp
+				|	exp MENOR{:condicion.append("<");:} exp
+				|	exp MAYIG{:condicion.append(">=");:} exp
+				|	exp MENIG{:condicion.append("<=");:} exp
+				|	exp IGUAL{:condicion.append("==");:} exp
+				|	exp NIGUAL{:condicion.append("!=");:} exp
+				|	cond AND{:condicion.append("&&");:} cond
+				|	cond OR{:condicion.append("||");:} cond
+				|	NOT{:condicion.append("!");:} cond
+				|	TTRUE {:condicion.append(" true ");:}
+				|	TFALSE {:condicion.append(" false ");:}
+				|	/*epsilon*/
+				;

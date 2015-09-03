@@ -1,0 +1,4 @@
+rm Llamada.java
+jflex Unilan.flex
+cup Unilan.cup
+javac *.java
